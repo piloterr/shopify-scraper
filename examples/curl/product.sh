@@ -3,6 +3,6 @@
 # Usage: PILOTERR_API_KEY=your-key ./product.sh
 set -euo pipefail
 
-curl -sS -G "https://api.piloterr.com/v2/shopify/product" \
+curl -sS --fail-with-body -G "https://api.piloterr.com/v2/shopify/product" \
   -H "x-api-key: ${PILOTERR_API_KEY}" \
   --data-urlencode query=https://www.decathlon.com/products/simond-backpacking-sleeping-bag-mt500-41-f-synthetic-346446
