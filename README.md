@@ -9,6 +9,8 @@
 The **Piloterr Shopify Scraper API** lets you extract public data from Shopify as **clean, structured JSON** — no proxies, headless browsers or HTML parsing to maintain. Endpoints available in production:
 
 - **Shopify Apps API** — Retrieve structured details about any Shopify App Store listing, including title, logo, screenshots, pricing plans, categories, and description.
+- **Shopify Catalog API** — List products from a Shopify shop.
+- **Shopify Collections API** — List collections from a Shopify shop.
 - **Shopify Product API** — Extract full product details from any Shopify store product page, including title, variants, pricing, images, inventory, and options.
 
 Use it for price monitoring, assortment tracking, competitor analysis, product research or catalog enrichment.
@@ -16,12 +18,16 @@ Use it for price monitoring, assortment tracking, competitor analysis, product r
 | Endpoint | Path | Credits | What you get |
 |---|---|---|---|
 | [Shopify Apps API](#shopify-apps-api) | `/v2/shopify/apps` | 1 | Retrieve structured details about any Shopify App Store listing, including title, logo, screenshots, pricing plans, categories, and description. |
+| [Shopify Catalog API](#shopify-catalog-api) | `/v2/shopify/catalog` | 1 | List products from a Shopify shop. query is the shop domain or a URL on that shop. page and limit choose the slice. |
+| [Shopify Collections API](#shopify-collections-api) | `/v2/shopify/collections` | 1 | List collections from a Shopify shop. query is the shop domain or a URL on that shop. page and limit choose the slice. |
 | [Shopify Product API](#shopify-product-api) | `/v2/shopify/product` | 1 | Extract full product details from any Shopify store product page, including title, variants, pricing, images, inventory, and options. |
 
 ## Table of contents
 
 - [How it works](#how-it-works)
 - [Shopify Apps API](#shopify-apps-api)
+- [Shopify Catalog API](#shopify-catalog-api)
+- [Shopify Collections API](#shopify-collections-api)
 - [Shopify Product API](#shopify-product-api)
 - [Code examples in other languages](#code-examples-in-other-languages)
 - [Practical use cases](#practical-use-cases)
@@ -184,6 +190,340 @@ Example response from the API reference, abridged — real values depend on the 
 | `pricing[].features` | string[] |  |
 | `categories` | any[] |  |
 | `description` | string |  |
+
+## Shopify Catalog API
+
+List products from a Shopify shop. query is the shop domain or a URL on that shop. page and limit choose the slice.
+
+`GET | POST https://api.piloterr.com/v2/shopify/catalog` · **1 credit per request** · [Full reference](https://app.piloterr.com/openapi)
+
+### Request parameters
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `query` | string | ✅ | Shop domain or a URL on that shop. |
+| `page` | number | — | Page number, starting at 1. |
+| `limit` | number | — | How many items to return on this page. |
+
+### Python example
+
+```python
+import json
+import os
+import requests
+
+response = requests.get(
+    "https://api.piloterr.com/v2/shopify/catalog",
+    headers={"x-api-key": os.environ["PILOTERR_API_KEY"]},
+    params={
+        "query": "https://www.decathlon.com",
+    },
+    timeout=60,
+)
+response.raise_for_status()
+data = response.json()
+
+print(json.dumps(data, indent=2, ensure_ascii=False)[:2000])
+```
+
+### TypeScript example
+
+```typescript
+type ShopifyCatalog = {
+  results?: {
+    id?: number;
+    url?: string;
+    tags?: string[];
+    image?: {
+      alt?: unknown;
+      src?: string;
+      width?: number;
+      height?: number;
+      position?: number;
+    };
+    title?: string;
+    handle?: string;
+    images?: {
+      alt?: unknown;
+      src?: string;
+      width?: number;
+      height?: number;
+      position?: number;
+    }[];
+    vendor?: string;
+    options?: {
+      name?: string;
+      values?: string[];
+      position?: number;
+    }[];
+    variants?: {
+      id?: number;
+      sku?: string;
+      grams?: number;
+      price?: number;
+      title?: string;
+      option1?: string;
+      option2?: unknown;
+      option3?: unknown;
+      available?: boolean;
+      price_display?: string;
+      compare_at_price?: unknown;
+      compare_at_price_display?: unknown;
+    }[];
+    created_at?: string;
+    updated_at?: string;
+    description?: string;
+    product_type?: string;
+    published_at?: string;
+  }[];
+  pagination?: {
+    next?: string;
+    page?: number;
+    per_page?: number;
+    total_pages?: unknown;
+    total_results?: unknown;
+  };
+};
+
+const params = new URLSearchParams({
+  "query": "https://www.decathlon.com",
+});
+
+const response = await fetch(`https://api.piloterr.com/v2/shopify/catalog?${params}`, {
+  headers: { "x-api-key": process.env.PILOTERR_API_KEY! },
+});
+if (!response.ok) throw new Error(`Piloterr error ${response.status}: ${await response.text()}`);
+
+const data = (await response.json()) as ShopifyCatalog;
+
+console.log(JSON.stringify(data, null, 2).slice(0, 2000));
+```
+
+<details>
+<summary><b>POST variant</b></summary>
+
+```http
+POST https://api.piloterr.com/v2/shopify/catalog
+x-api-key: YOUR_API_KEY
+Content-Type: application/json
+
+{"query": "https://www.decathlon.com"}
+```
+</details>
+
+### Output example
+
+Example response from the API reference, abridged — real values depend on the page you scrape.
+
+```json
+{
+  "results": [
+    {
+      "id": 8209730371646,
+      "url": "https://www.decathlon.com/products/men-s-hiking-jacket-mh500-brown",
+      "tags": [
+        "Down Jackets",
+        "FAMILY: 11413"
+      ],
+      "image": {
+        "alt": null,
+        "src": "https://cdn.shopify.com/s/files/1/1330/6287/files/default_61e4eded-7b52-4c7e-b922-fdfec444efd1.jpg?v=1793283479",
+        "width": 969,
+        "height": 969,
+        "position": 1
+      },
+      "title": "Quechua Men’s MH500 Synthetic Puffer Jacket",
+      "handle": "men-s-hiking-jacket-mh500-brown",
+      "images": [
+        {},
+        {}
+      ],
+      "vendor": "Quechua",
+      "options": [
+        {}
+      ],
+      "variants": [
+        {},
+        {}
+      ],
+      "created_at": "2026-08-10T07:57:16-07:00",
+      "updated_at": "2026-10-30T10:41:35-07:00",
+      "description": "When the temperature drops, this down jacket is your perfect companion, offering warmth, slim fit, a hood and ideal comfort for your excu…",
+      "product_type": "Padded Jacket",
+      "published_at": "2026-10-29T06:59:49-07:00"
+    }
+  ],
+  "pagination": {
+    "next": "https://www.decathlon.com/products.json?limit=1&page=2",
+    "page": 1,
+    "per_page": 1,
+    "total_pages": null,
+    "total_results": null
+  }
+}
+```
+
+### Response fields
+
+| Field | Type | Description |
+|---|---|---|
+| `results[]` | object[] |  |
+| `results[].id` | integer |  |
+| `results[].url` | string |  |
+| `results[].tags` | string[] |  |
+| `results[].image` | object |  |
+| `results[].title` | string |  |
+| `results[].handle` | string |  |
+| `results[].images[]` | object[] |  |
+| `results[].vendor` | string |  |
+| `results[].options[]` | object[] |  |
+| `results[].variants[]` | object[] |  |
+| `results[].created_at` | string |  |
+| `results[].updated_at` | string |  |
+| `results[].description` | string |  |
+| `results[].product_type` | string |  |
+| `results[].published_at` | string |  |
+| `pagination` | object |  |
+| `pagination.next` | string |  |
+| `pagination.page` | integer |  |
+| `pagination.per_page` | integer |  |
+| `pagination.total_pages` | object |  |
+| `pagination.total_results` | object |  |
+
+## Shopify Collections API
+
+List collections from a Shopify shop. query is the shop domain or a URL on that shop. page and limit choose the slice.
+
+`GET | POST https://api.piloterr.com/v2/shopify/collections` · **1 credit per request** · [Full reference](https://app.piloterr.com/openapi)
+
+### Request parameters
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `query` | string | ✅ | Shop domain or a URL on that shop. |
+| `page` | number | — | Page number, starting at 1. |
+| `limit` | number | — | How many items to return on this page. |
+
+### Python example
+
+```python
+import json
+import os
+import requests
+
+response = requests.get(
+    "https://api.piloterr.com/v2/shopify/collections",
+    headers={"x-api-key": os.environ["PILOTERR_API_KEY"]},
+    params={
+        "query": "https://www.decathlon.com",
+    },
+    timeout=60,
+)
+response.raise_for_status()
+data = response.json()
+
+print(json.dumps(data, indent=2, ensure_ascii=False)[:2000])
+```
+
+### TypeScript example
+
+```typescript
+type ShopifyCollections = {
+  results?: {
+    id?: number;
+    url?: string;
+    image?: unknown;
+    title?: string;
+    handle?: string;
+    updated_at?: string;
+    description?: string;
+    published_at?: string;
+    products_count?: number;
+  }[];
+  pagination?: {
+    next?: string;
+    page?: number;
+    per_page?: number;
+    total_pages?: unknown;
+    total_results?: unknown;
+  };
+};
+
+const params = new URLSearchParams({
+  "query": "https://www.decathlon.com",
+});
+
+const response = await fetch(`https://api.piloterr.com/v2/shopify/collections?${params}`, {
+  headers: { "x-api-key": process.env.PILOTERR_API_KEY! },
+});
+if (!response.ok) throw new Error(`Piloterr error ${response.status}: ${await response.text()}`);
+
+const data = (await response.json()) as ShopifyCollections;
+
+console.log(JSON.stringify(data, null, 2).slice(0, 2000));
+```
+
+<details>
+<summary><b>POST variant</b></summary>
+
+```http
+POST https://api.piloterr.com/v2/shopify/collections
+x-api-key: YOUR_API_KEY
+Content-Type: application/json
+
+{"query": "https://www.decathlon.com"}
+```
+</details>
+
+### Output example
+
+Example response from the API reference, abridged — real values depend on the page you scrape.
+
+```json
+{
+  "results": [
+    {
+      "id": 261040504894,
+      "url": "https://www.decathlon.com/collections/camping-tents-2-3-person",
+      "image": null,
+      "title": "2-Person Tents",
+      "handle": "camping-tents-2-3-person",
+      "updated_at": "2026-10-29T04:06:55-07:00",
+      "description": "<h2><span>The perfect 2-person tent for camping</span></h2>\n<p dir=\"ltr\"><span>Embark on your next outdoor adventure with a Decathlon 2-p…",
+      "published_at": "2021-04-15T12:37:52-07:00",
+      "products_count": 2
+    }
+  ],
+  "pagination": {
+    "next": "https://www.decathlon.com/collections.json?limit=1&page=2",
+    "page": 1,
+    "per_page": 1,
+    "total_pages": null,
+    "total_results": null
+  }
+}
+```
+
+### Response fields
+
+| Field | Type | Description |
+|---|---|---|
+| `results[]` | object[] |  |
+| `results[].id` | integer |  |
+| `results[].url` | string |  |
+| `results[].image` | object |  |
+| `results[].title` | string |  |
+| `results[].handle` | string |  |
+| `results[].updated_at` | string |  |
+| `results[].description` | string |  |
+| `results[].published_at` | string |  |
+| `results[].products_count` | integer |  |
+| `pagination` | object |  |
+| `pagination.next` | string |  |
+| `pagination.page` | integer |  |
+| `pagination.per_page` | integer |  |
+| `pagination.total_pages` | object |  |
+| `pagination.total_results` | object |  |
 
 ## Shopify Product API
 
@@ -416,15 +756,15 @@ Example response from the API reference, abridged — real values depend on the 
 
 Ready-to-run examples live in the [`examples/`](examples) folder. Each one reads your key from the `PILOTERR_API_KEY` environment variable.
 
-| Language | Apps | Product |
-|---|---|---|
-| cURL (Bash) | [`apps`](examples/curl/apps.sh) | [`product`](examples/curl/product.sh) |
-| PHP | [`apps`](examples/php/apps.php) | [`product`](examples/php/product.php) |
-| C# | [`apps`](examples/csharp/Apps.cs) | [`product`](examples/csharp/Product.cs) |
-| Go | [`apps`](examples/go/apps.go) | [`product`](examples/go/product.go) |
-| Java | [`apps`](examples/java/AppsExample.java) | [`product`](examples/java/ProductExample.java) |
-| Ruby | [`apps`](examples/ruby/apps.rb) | [`product`](examples/ruby/product.rb) |
-| Node.js | [`apps`](examples/nodejs/apps.mjs) | [`product`](examples/nodejs/product.mjs) |
+| Language | Apps | Catalog | Collections | Product |
+|---|---|---|---|---|
+| cURL (Bash) | [`apps`](examples/curl/apps.sh) | [`catalog`](examples/curl/catalog.sh) | [`collections`](examples/curl/collections.sh) | [`product`](examples/curl/product.sh) |
+| PHP | [`apps`](examples/php/apps.php) | [`catalog`](examples/php/catalog.php) | [`collections`](examples/php/collections.php) | [`product`](examples/php/product.php) |
+| C# | [`apps`](examples/csharp/Apps.cs) | [`catalog`](examples/csharp/Catalog.cs) | [`collections`](examples/csharp/Collections.cs) | [`product`](examples/csharp/Product.cs) |
+| Go | [`apps`](examples/go/apps.go) | [`catalog`](examples/go/catalog.go) | [`collections`](examples/go/collections.go) | [`product`](examples/go/product.go) |
+| Java | [`apps`](examples/java/AppsExample.java) | [`catalog`](examples/java/CatalogExample.java) | [`collections`](examples/java/CollectionsExample.java) | [`product`](examples/java/ProductExample.java) |
+| Ruby | [`apps`](examples/ruby/apps.rb) | [`catalog`](examples/ruby/catalog.rb) | [`collections`](examples/ruby/collections.rb) | [`product`](examples/ruby/product.rb) |
+| Node.js | [`apps`](examples/nodejs/apps.mjs) | [`catalog`](examples/nodejs/catalog.mjs) | [`collections`](examples/nodejs/collections.mjs) | [`product`](examples/nodejs/product.mjs) |
 
 ## Practical use cases
 
@@ -454,11 +794,15 @@ No. Piloterr handles rendering, proxy rotation and retries on its side. You only
 
 ### How much does a request cost?
 
-Credits per call: `/v2/shopify/apps` **1**, `/v2/shopify/product` **1**. See the [Piloterr website](https://www.piloterr.com) for plans.
+Credits per call: `/v2/shopify/apps` **1**, `/v2/shopify/catalog` **1**, `/v2/shopify/collections` **1**, `/v2/shopify/product` **1**. See the [Piloterr website](https://www.piloterr.com) for plans.
 
 ### What data does the Shopify API return?
 
-Each endpoint returns structured JSON: **Shopify Apps** — `url`, `logo`, `title`, `handle`, `images[]`, `images[].url`; **Shopify Product** — `id`, `tags`, `image`, `image.id`, `image.alt`, `image.src`.
+Each endpoint returns structured JSON: **Shopify Apps** — `url`, `logo`, `title`, `handle`, `images[]`, `images[].url`; **Shopify Catalog** — `results[]`, `results[].id`, `results[].url`, `results[].tags`, `results[].image`, `results[].title`; **Shopify Collections** — `results[]`, `results[].id`, `results[].url`, `results[].image`, `results[].title`, `results[].handle`; **Shopify Product** — `id`, `tags`, `image`, `image.id`, `image.alt`, `image.src`.
+
+### How do I paginate Shopify results?
+
+Use the `page` parameter and keep requesting while the response indicates more results.
 
 ### Which languages are supported?
 
